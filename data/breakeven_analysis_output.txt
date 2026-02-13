@@ -1,0 +1,181 @@
+====================================================================================================
+BREAKEVEN ANALYSIS: DELTA-NEUTRAL BASIS STRATEGY
+Period: 2024-12-31 to 2026-02-13 (410 days)
+====================================================================================================
+
+### 1. Observed Annualized Rates
+
+  SOL lending APY (Kamino):       +5.24%
+  USDC borrowing APY (Kamino):    +6.71%
+  Carry spread (lend − borr):     -1.47%
+  HL funding rate:                +4.16%
+  Drift funding rate:             -5.41%
+
+  Net spread = R_lend + R_fund − R_borr:
+    Hyperliquid: +5.24% + (+4.16%) − 6.71% =   +2.69%
+    Drift:       +5.24% + (-5.41%) − 6.71% =   -6.88%
+
+### 2. Theoretical Gross APY (before fees/liqs)
+  Formula: Gross APY = L/2 × spread
+
+  Leverage  │  Hyperliquid        Drift
+  --------------------------------------
+      2.0x  │       +2.69%       -6.88%
+      3.0x  │       +4.03%      -10.32%
+      3.8x  │       +5.11%      -13.07%
+      4.0x  │       +5.38%      -13.76%
+
+### 3. Round-Trip Fee Drag (open + close + gas)
+  Formula: fees = notional × (asgard_bps + venue_bps) / 10000 + close + gas
+
+     Capital  Lev  │   HL fee%   DR fee%  │     HL $     DR $
+  ----------------------------------------------------------
+  $   1,000   2x  │    0.420%    0.420%  │ $   4.2 $   4.2
+  $   1,000   3x  │    0.530%    0.530%  │ $   5.3 $   5.3
+  $   1,000   4x  │    0.640%    0.640%  │ $   6.4 $   6.4
+  $   5,000   2x  │    0.260%    0.260%  │ $  13.0 $  13.0
+  $   5,000   3x  │    0.370%    0.370%  │ $  18.5 $  18.5
+  $   5,000   4x  │    0.480%    0.480%  │ $  24.0 $  24.0
+  $  10,000   2x  │    0.240%    0.240%  │ $  24.0 $  24.0
+  $  10,000   3x  │    0.350%    0.350%  │ $  35.0 $  35.0
+  $  10,000   4x  │    0.460%    0.460%  │ $  46.0 $  46.0
+  $  50,000   2x  │    0.224%    0.224%  │ $ 112.0 $ 112.0
+  $  50,000   3x  │    0.334%    0.334%  │ $ 167.0 $ 167.0
+  $  50,000   4x  │    0.444%    0.444%  │ $ 222.0 $ 222.0
+  $ 100,000   2x  │    0.222%    0.222%  │ $ 222.0 $ 222.0
+  $ 100,000   3x  │    0.332%    0.332%  │ $ 332.0 $ 332.0
+  $ 100,000   4x  │    0.442%    0.442%  │ $ 442.0 $ 442.0
+
+### 4. Breakeven Spread (min R_lend + R_fund − R_borr to cover fees)
+  Assumes: 1 round-trip/year, ~6 rebalances/year
+
+     Capital  Lev  │      HL BE      DR BE  │  HL actual  DR actual  │  HL margin  DR margin
+  ----------------------------------------------------------------------------------------------------
+  $   1,000   2x  │    +2.220%    +0.421%  │    +2.689%    -6.879%  │    +0.469%    -7.299%     ok / UNDER
+  $   1,000   3x  │    +1.553%    +0.354%  │    +2.689%    -6.879%  │    +1.136%    -7.233%     ok / UNDER
+  $   1,000   4x  │    +1.220%    +0.320%  │    +2.689%    -6.879%  │    +1.469%    -7.199%     ok / UNDER
+  $   5,000   2x  │    +0.620%    +0.260%  │    +2.689%    -6.879%  │    +2.069%    -7.139%     ok / UNDER
+  $   5,000   3x  │    +0.487%    +0.247%  │    +2.689%    -6.879%  │    +2.202%    -7.126%     ok / UNDER
+  $   5,000   4x  │    +0.420%    +0.240%  │    +2.689%    -6.879%  │    +2.269%    -7.119%     ok / UNDER
+  $  10,000   2x  │    +0.420%    +0.240%  │    +2.689%    -6.879%  │    +2.269%    -7.119%     ok / UNDER
+  $  10,000   3x  │    +0.353%    +0.233%  │    +2.689%    -6.879%  │    +2.336%    -7.112%     ok / UNDER
+  $  10,000   4x  │    +0.320%    +0.230%  │    +2.689%    -6.879%  │    +2.369%    -7.109%     ok / UNDER
+  $  50,000   2x  │    +0.260%    +0.224%  │    +2.689%    -6.879%  │    +2.429%    -7.103%     ok / UNDER
+  $  50,000   3x  │    +0.247%    +0.223%  │    +2.689%    -6.879%  │    +2.442%    -7.102%     ok / UNDER
+  $  50,000   4x  │    +0.240%    +0.222%  │    +2.689%    -6.879%  │    +2.449%    -7.101%     ok / UNDER
+  $ 100,000   2x  │    +0.240%    +0.222%  │    +2.689%    -6.879%  │    +2.449%    -7.101%     ok / UNDER
+  $ 100,000   3x  │    +0.233%    +0.221%  │    +2.689%    -6.879%  │    +2.456%    -7.100%     ok / UNDER
+  $ 100,000   4x  │    +0.230%    +0.221%  │    +2.689%    -6.879%  │    +2.459%    -7.100%     ok / UNDER
+
+### 5. Breakeven Funding Rate (min R_fund to net zero)
+  Formula: R_fund_min = BE_spread − R_lend + R_borr
+  Given: R_lend=5.24%, R_borr=6.71%
+
+     Capital  Lev  │  HL min R_fund  DR min R_fund  │  HL actual  DR actual  │ Status
+  -----------------------------------------------------------------------------------------------
+  $   1,000   2x  │         +3.69%         +1.89%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $   1,000   3x  │         +3.03%         +1.83%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $   1,000   4x  │         +2.69%         +1.79%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $   5,000   2x  │         +2.09%         +1.73%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $   5,000   3x  │         +1.96%         +1.72%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $   5,000   4x  │         +1.89%         +1.71%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $  10,000   2x  │         +1.89%         +1.71%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $  10,000   3x  │         +1.83%         +1.71%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $  10,000   4x  │         +1.79%         +1.70%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $  50,000   2x  │         +1.73%         +1.70%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $  50,000   3x  │         +1.72%         +1.70%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $  50,000   4x  │         +1.71%         +1.69%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $ 100,000   2x  │         +1.71%         +1.69%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $ 100,000   3x  │         +1.71%         +1.69%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+  $ 100,000   4x  │         +1.70%         +1.69%  │     +4.16%     -5.41%  │ HL:       ok  DR:NEED MORE
+
+### 6. Max SOL Move Before Liquidation (either leg)
+  Short leg liq: SOL rises by > X%    Long leg liq: SOL drops by > X%
+
+  Leverage        Venue  │  Short liq   Long liq    Binding  │       $ range @ $189
+  --------------------------------------------------------------------------------
+      2.0x  Hyperliquid  │     +90.5%     -45.0%      ↑long  │ $104 – $361
+      2.0x        Drift  │     +94.2%     -47.0%      ↑long  │ $100 – $368
+      3.0x  Hyperliquid  │     +46.3%     -28.3%      ↑long  │ $136 – $277
+      3.0x        Drift  │     +47.8%     -30.3%      ↑long  │ $132 – $280
+      3.8x  Hyperliquid  │     +33.3%     -21.3%      ↑long  │ $149 – $253
+      3.8x        Drift  │     +34.3%     -23.3%      ↑long  │ $145 – $254
+      4.0x  Hyperliquid  │     +31.1%     -20.0%      ↑long  │ $152 – $248
+      4.0x        Drift  │     +32.0%     -22.0%      ↑long  │ $148 – $250
+
+### 7. Full Breakeven Summary ($10k)
+
+   Lev        Venue  │   Gross    Fees  Bridge     Net  │  Liq dist   BE Fund  Act Fund
+  ------------------------------------------------------------------------------------------
+  2.0x  Hyperliquid  │  +2.69%   0.24%  0.180%  +2.27%  │    +45.0%    +1.89%    +4.16%
+  2.0x        Drift  │  -6.88%   0.24%  0.000%  -7.12%  │    +47.0%    +1.71%    -5.41%
+  3.0x  Hyperliquid  │  +4.03%   0.35%  0.180%  +3.50%  │    +28.3%    +1.83%    +4.16%
+  3.0x        Drift  │ -10.32%   0.35%  0.000% -10.67%  │    +30.3%    +1.71%    -5.41%
+  3.8x  Hyperliquid  │  +5.11%   0.44%  0.180%  +4.49%  │    +21.3%    +1.80%    +4.16%
+  3.8x        Drift  │ -13.07%   0.44%  0.000% -13.51%  │    +23.3%    +1.70%    -5.41%
+  4.0x  Hyperliquid  │  +5.38%   0.46%  0.180%  +4.74%  │    +20.0%    +1.79%    +4.16%
+  4.0x        Drift  │ -13.76%   0.46%  0.000% -14.22%  │    +22.0%    +1.70%    -5.41%
+
+### 8. Required vs Actual Funding Rate
+  Net APY = 0 when R_fund = R_borr − R_lend + 2/L × fee_drag
+  Shaded cells: actual funding meets requirement
+
+   Lev  │    Capital │  HL required  HL actual     │  DR required  DR actual    
+  ----------------------------------------------------------------------------------
+  2.0x │ $   1,000 │       +3.69%     +4.16%  << │       +1.89%     -5.41%    
+  2.0x │ $  10,000 │       +1.89%     +4.16%  << │       +1.71%     -5.41%    
+  2.0x │ $ 100,000 │       +1.71%     +4.16%  << │       +1.69%     -5.41%    
+  3.0x │ $   1,000 │       +3.03%     +4.16%  << │       +1.83%     -5.41%    
+  3.0x │ $  10,000 │       +1.83%     +4.16%  << │       +1.71%     -5.41%    
+  3.0x │ $ 100,000 │       +1.71%     +4.16%  << │       +1.69%     -5.41%    
+  3.8x │ $   1,000 │       +2.75%     +4.16%  << │       +1.80%     -5.41%    
+  3.8x │ $  10,000 │       +1.80%     +4.16%  << │       +1.70%     -5.41%    
+  3.8x │ $ 100,000 │       +1.70%     +4.16%  << │       +1.69%     -5.41%    
+  4.0x │ $   1,000 │       +2.69%     +4.16%  << │       +1.79%     -5.41%    
+  4.0x │ $  10,000 │       +1.79%     +4.16%  << │       +1.70%     -5.41%    
+  4.0x │ $ 100,000 │       +1.70%     +4.16%  << │       +1.69%     -5.41%    
+
+### 9. Effect of Holding Period on Breakeven ($10k)
+  Shorter holds → open/close fees amortized over fewer days → higher drag
+
+      Hold  Lev  │  HL Net APY  DR Net APY  │  HL BE Spread  DR BE Spread
+  ----------------------------------------------------------------------
+       90d   2x  │      +1.54%      -7.85%  │       +1.153%       +0.973%
+       90d   3x  │      +2.43%     -11.74%  │       +1.066%       +0.946%
+       90d   4x  │      +3.33%     -15.62%  │       +1.023%       +0.933%
+      180d   2x  │      +2.02%      -7.37%  │       +0.667%       +0.487%
+      180d   3x  │      +3.14%     -11.03%  │       +0.593%       +0.473%
+      180d   4x  │      +4.27%     -14.69%  │       +0.556%       +0.466%
+      365d   2x  │      +2.27%      -7.12%  │       +0.420%       +0.240%
+      365d   3x  │      +3.50%     -10.67%  │       +0.353%       +0.233%
+      365d   4x  │      +4.74%     -14.22%  │       +0.320%       +0.230%
+      730d   2x  │      +2.39%      -7.00%  │       +0.300%       +0.120%
+      730d   3x  │      +3.68%     -10.49%  │       +0.237%       +0.117%
+      730d   4x  │      +4.97%     -13.99%  │       +0.205%       +0.115%
+
+### 10. Key Takeaways
+
+  The formula:  Net APY = L/2 × (R_lend + R_fund − R_borr) − fee_drag(L, C) − bridge_drag(C)
+
+  What leverage amplifies:
+    • The spread (R_lend + R_fund − R_borr) is multiplied by L/2
+    • If spread > 0: higher leverage = higher gross income
+    • If spread < 0: higher leverage = deeper losses
+    • HL spread = +2.69%  →  2x: +2.69%,  3x: +4.03%,  4x: +5.38% gross
+    • DR spread = -6.88%  →  2x: -6.88%,  3x: -10.32%,  4x: -13.76% gross
+
+  What fees cost:
+    • Fee drag scales as ~L/C (higher leverage and smaller capital = more drag)
+    • At $1k/2x: 0.42% drag.  At $100k/2x: 0.222% drag.
+    • Bridge cost matters only at small capital: $1k = 1.80%/yr,  $100k = 0.0180%/yr
+
+  What kills the strategy:
+    • Liquidation events (not modeled here — see backtest_comparison.py)
+    • The breakeven analysis assumes no liquidations. In practice, 3x+ leverage
+      hits liquidation events that dominate the P&L.
+    • Liquidation distance at 3x: HL=28% move, Drift=30% move
+    • SOL moved -58% during this period — well beyond 3x liq distance
+
+====================================================================================================
+DONE
+====================================================================================================

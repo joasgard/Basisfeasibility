@@ -1,0 +1,126 @@
+Loading data...
+Aligned: 410 days (2024-12-31 to 2026-02-13)
+SOL: $189.44 → $79.87 (-57.8%)
+
+==========================================================================================
+DELTA-NEUTRAL BACKTEST WITH CROSS-LEG CAPITAL REBALANCING
+Period: 2024-12-31 to 2026-02-13 (410 days)
+SOL: $189.44 → $79.87
+Rebalance cost: $3 (bridge+gas) vs full rotation (0.15% + 0.035%×2 + gas)
+==========================================================================================
+
+### 1. Performance Summary
+
+       Cap  Lev    Ann Ret      Gross       Fees     Fee%   Cap Rebals  Full Rots   Liqs   Max DD
+----------------------------------------------------------------------------------------------------
+$   1,000   2x     -8.5% $      75 $      32   42.8%          8        1     1   15.1%
+$   1,000   3x     -5.3% $      76 $      31   40.9%          7        1     1    9.5%
+$   1,000   4x    -22.1% $      88 $      71   81.1%         12        5     5   32.8%
+$  10,000   2x     -4.8% $     747 $      63    8.4%          6        1     1   12.9%
+$  10,000   3x     -3.5% $     771 $      87   11.3%          7        1     1    8.4%
+$  10,000   4x    -19.6% $     883 $     283   32.1%         12        5     5   31.5%
+$ 100,000   2x     -4.7% $   7,478 $     432    5.8%          6        1     1   12.9%
+$ 100,000   3x     -3.3% $   7,722 $     647    8.4%          7        1     1    8.3%
+$ 100,000   4x    -19.3% $   8,833 $   2,406   27.2%         12        5     5   31.4%
+
+### 2. Optimal Rebalance Trigger — $10k
+(Trigger = rebalance when effective leverage on either leg exceeds this)
+
+  2x leverage:
+     Trigger    Ann Ret   Rebals   Rots   Liqs     Fees   Liq Pen
+  ---------------------------------------------------------------
+          3x     +3.3%     19     0     0 $    79 $      0
+          4x     -4.8%      6     1     1 $    63 $  1,196
+          5x     +4.0%      5     0     0 $    37 $      0
+          6x     -9.6%      3     2     2 $    74 $  1,470
+          8x     -9.6%      3     2     2 $    74 $  1,472
+         10x     -8.1%      3     2     2 $    75 $  1,319
+       never    -10.5%      0     4     4 $   110 $  1,754
+  → Best: 5x trigger (+4.0%)
+
+  3x leverage:
+     Trigger    Ann Ret   Rebals   Rots   Liqs     Fees   Liq Pen
+  ---------------------------------------------------------------
+          4x    -13.2%     19     2     2 $   153 $  2,020
+          5x     -8.4%     11     2     2 $   132 $  1,524
+          6x     -3.5%      7     1     1 $    87 $    830
+          8x     -5.2%     14     5     5 $   247 $  2,170
+         10x    -18.6%     10     7     7 $   287 $  3,489
+       never    -33.6%      0    10    10 $   323 $  5,014
+  → Best: 6x trigger (-3.5%)
+
+  4x leverage:
+     Trigger    Ann Ret   Rebals   Rots   Liqs     Fees   Liq Pen
+  ---------------------------------------------------------------
+          6x    -25.4%     88     7     7 $   569 $  3,422
+          8x    -19.6%     12     5     5 $   283 $  3,244
+         10x    -37.5%     15    12    12 $   528 $  5,308
+       never    -42.4%      0    19    19 $   870 $  9,035
+  → Best: 8x trigger (-19.6%)
+
+### 3. Rebalance Model — Fee Breakdown
+
+       Cap  Lev │    Ann Ret       Fees   Rebals │ Note
+---------------------------------------------------------------------------
+$   1,000   2x │     -8.5% $      32      8 cap │ 1 full rotations, 1 liquidations
+$   1,000   3x │     -5.3% $      31      7 cap │ 1 full rotations, 1 liquidations
+$   1,000   4x │    -22.1% $      71     12 cap │ 5 full rotations, 5 liquidations
+$  10,000   2x │     -4.8% $      63      6 cap │ 1 full rotations, 1 liquidations
+$  10,000   3x │     -3.5% $      87      7 cap │ 1 full rotations, 1 liquidations
+$  10,000   4x │    -19.6% $     283     12 cap │ 5 full rotations, 5 liquidations
+
+### 4a. Event Log — $10k, 2x
+  2024-12-31  OPEN   @ $189.44  long_eq=$4990 short_eq=$4990  notional=$10000  fees=$20
+  2025-01-18  REBAL  @ $262.20  transfer=$3814  eff_lev=11.4x  → long_eq=$5031 short_eq=$5031  fee=$3
+  2025-02-01  REBAL  @ $212.81  transfer=$2633  eff_lev=4.7x  → long_eq=$5047 short_eq=$5047  fee=$3
+  2025-02-24  REBAL  @ $141.94  transfer=$3751  eff_lev=5.9x  → long_eq=$5034 short_eq=$5034  fee=$3
+  2025-07-21  REBAL  @ $195.76  transfer=$2827  eff_lev=4.3x  → long_eq=$5204 short_eq=$5204  fee=$3
+  2025-09-12  REBAL  @ $242.09  transfer=$2411  eff_lev=4.3x  → long_eq=$5378 short_eq=$5378  fee=$3
+  2025-10-10  **LIQ** @ $187.53  leg=LONG  long_eq=$1196 short_eq=$8321
+  2025-10-10  REOPEN @ $187.53  long_eq=$4747 short_eq=$4747  notional=$9494  fees=$23
+  2025-12-17  REBAL  @ $123.18  transfer=$3239  eff_lev=4.2x  → long_eq=$4731 short_eq=$4731  fee=$3
+
+### 4b. Event Log — $10k, 3x
+  2024-12-31  OPEN   @ $189.44  long_eq=$4985 short_eq=$4985  notional=$15000  fees=$30
+  2025-01-03  REBAL  @ $218.02  transfer=$2249  eff_lev=6.3x  → long_eq=$4992 short_eq=$4992  fee=$3
+  2025-01-09  REBAL  @ $184.91  transfer=$2641  eff_lev=6.2x  → long_eq=$5001 short_eq=$5001  fee=$3
+  2025-01-17  REBAL  @ $219.51  transfer=$2728  eff_lev=7.6x  → long_eq=$5020 short_eq=$5020  fee=$3
+  2025-01-18  **LIQ** @ $262.20  leg=SHORT  long_eq=$8410 short_eq=$830
+  2025-01-18  REOPEN @ $262.20  long_eq=$4603 short_eq=$4603  notional=$13808  fees=$35
+  2025-02-02  REBAL  @ $203.45  transfer=$3116  eff_lev=7.1x  → long_eq=$4621 short_eq=$4621  fee=$3
+  2025-02-26  REBAL  @ $135.32  transfer=$3594  eff_lev=7.0x  → long_eq=$4617 short_eq=$4617  fee=$3
+  2025-07-21  REBAL  @ $195.76  transfer=$3166  eff_lev=6.4x  → long_eq=$4779 short_eq=$4779  fee=$3
+  2025-11-21  REBAL  @ $128.60  transfer=$3694  eff_lev=6.1x  → long_eq=$4853 short_eq=$4853  fee=$3
+
+### 5. Asgard Fee Sensitivity — $10k, 3x (rebalance model)
+
+     Fee    Ann Ret   Total Fees
+--------------------------------
+  0.15%     -3.5% $        87
+  0.10%     -3.4% $        73
+  0.05%     -3.2% $        58
+  0.00%     -3.1% $        44
+
+### 6. P&L Waterfall — $10k
+  (Carry is SOL-denominated yield valued at daily price; MTM drag = revaluation
+   of accumulated SOL when SOL price falls. Funding settles in USD, no drag.)
+
+ Lev      Carry    Funding      Gross     Fees   Liq Pen   MTM Drag     Return
+-----------------------------------------------------------------------------
+ 2x  $     214 $     534 $     747 $    63 $  1,196 $     -28  $    -540 (-4.8%)
+ 3x  $     205 $     566 $     771 $    87 $    830 $    -244  $    -390 (-3.5%)
+ 4x  $     125 $     758 $     883 $   283 $  3,244 $     445  $  -2,199 (-19.6%)
+
+### 7. Delta-Neutral Sanity Check — $10k, 3x
+  Start equity:  $9,969
+  End equity:    $9,611
+  Min equity:    $9,201  (on 2025-04-08)
+  Max equity:    $10,041  (on 2025-01-17)
+  Std dev:       $266
+  SOL moved:     -57.8%
+  Equity moved:  -3.6%
+  → Strategy is delta-neutral ✓
+
+==========================================================================================
+DONE
+==========================================================================================

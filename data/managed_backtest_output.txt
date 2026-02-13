@@ -1,0 +1,121 @@
+Loading data...
+Aligned: 410 days (2024-12-31 to 2026-02-13)
+SOL price: $189.44 → $79.87 (-57.8%)
+
+=====================================================================================
+MANAGED POSITION BACKTEST
+Period: 2024-12-31 to 2026-02-13 (410 days)
+SOL: $189.44 → $79.87 (-57.8%)
+=====================================================================================
+
+### 1. Naive (buy-and-hold) vs Managed — $1k capital
+
+Strategy                                     2x               3x               4x
+------------------------------------------------------------------------------
+Naive (no management)            -13.1% ( 5r)   -27.7% ( 9r)   -50.9% (17r)
+Managed (10% liq buffer)          +3.8% ( 6r)   -17.6% (18r)   -19.5% (36r)
+Managed + APY exit (<0%)          +3.8% ( 6r)   -17.6% (18r)   -19.5% (36r)
+Managed + APY exit (<10%)        -45.1% (152r)   -46.0% (121r)   -48.0% (119r)
+
+### 2. Detailed Comparison — 3x leverage, $1k capital
+
+Metric                                Naive        Managed     Mgd+APY10%
+----------------------------------------------------------------------
+Final capital                       $689.35        $802.15        $483.03
+Annualized return                   -27.66%        -17.61%        -46.02%
+Total fees paid                      $42.86         $88.93        $524.22
+Gross income (carry+fund)            $76.12         $76.56         $57.40
+Fees as % of gross                    56.3%         116.2%         913.2%
+Rotations (open+close)                    9             18            121
+Forced rebalances                         8             17            120
+Liquidations (would-be)                   8              4              2
+Max drawdown                          31.2%          19.9%          51.8%
+
+### 3. Rebalance Events — 3x, $1k, managed
+  2024-12-31  OPEN   @ $189.44  capital=$994.70  liq_range=[$129.45, $249.43]
+  2025-01-18  CLOSE  @ $262.20  capital=$1003.13  reason: LIQUIDATION_SHORT (high=$271.18 >= liq=$249.43)
+  2025-01-18  LIQ_PENALTY  $-50.16
+  2025-01-19  OPEN   @ $252.44  capital=$947.83  liq_range=[$172.50, $332.38]
+  2025-02-03  CLOSE  @ $216.06  capital=$952.05  reason: MARGIN_LONG (1.7% from liq)
+  2025-02-04  OPEN   @ $206.61  capital=$946.91  liq_range=[$141.18, $272.04]
+  2025-02-24  CLOSE  @ $141.94  capital=$948.16  reason: LIQUIDATION_LONG (low=$137.51 <= liq=$141.18)
+  2025-02-24  LIQ_PENALTY  $-47.41
+  2025-02-25  OPEN   @ $144.33  capital=$895.78  liq_range=[$98.63, $190.03]
+  2025-03-02  CLOSE  @ $178.58  capital=$896.84  reason: MARGIN_SHORT (5.6% from liq)
+  2025-03-03  OPEN   @ $142.15  capital=$891.88  liq_range=[$97.14, $187.16]
+  2025-04-06  CLOSE  @ $105.84  capital=$885.26  reason: MARGIN_LONG (6.3% from liq)
+  2025-04-07  OPEN   @ $106.94  capital=$880.34  liq_range=[$73.08, $140.80]
+  2025-04-12  CLOSE  @ $132.21  capital=$878.93  reason: MARGIN_SHORT (5.1% from liq)
+  2025-04-13  OPEN   @ $128.32  capital=$874.03  liq_range=[$87.69, $168.95]
+  2025-04-23  CLOSE  @ $151.05  capital=$871.01  reason: MARGIN_SHORT (9.6% from liq)
+  2025-04-24  OPEN   @ $152.53  capital=$866.14  liq_range=[$104.23, $200.83]
+  2025-05-13  CLOSE  @ $183.94  capital=$875.23  reason: MARGIN_SHORT (8.6% from liq)
+  2025-05-14  OPEN   @ $176.59  capital=$870.34  liq_range=[$120.67, $232.51]
+  2025-06-21  CLOSE  @ $135.34  capital=$879.29  reason: MARGIN_LONG (7.8% from liq)
+  2025-06-22  OPEN   @ $131.67  capital=$874.38  liq_range=[$89.97, $173.37]
+  2025-06-30  CLOSE  @ $154.79  capital=$876.63  reason: MARGIN_SHORT (8.4% from liq)
+  2025-07-01  OPEN   @ $146.80  capital=$871.74  liq_range=[$100.31, $193.29]
+  2025-07-16  CLOSE  @ $173.84  capital=$877.55  reason: MARGIN_SHORT (9.7% from liq)
+  2025-07-17  OPEN   @ $176.05  capital=$872.65  liq_range=[$120.30, $231.80]
+  2025-08-24  CLOSE  @ $206.15  capital=$899.97  reason: MARGIN_SHORT (9.3% from liq)
+  2025-08-25  OPEN   @ $187.12  capital=$895.00  liq_range=[$127.87, $246.37]
+  2025-09-10  CLOSE  @ $224.15  capital=$902.64  reason: MARGIN_SHORT (9.0% from liq)
+  2025-09-11  OPEN   @ $228.78  capital=$897.66  liq_range=[$156.33, $301.23]
+  2025-10-10  CLOSE  @ $187.53  capital=$905.98  reason: LIQUIDATION_LONG (low=$137.51 <= liq=$156.33)
+  2025-10-10  LIQ_PENALTY  $-45.30
+  2025-10-11  OPEN   @ $177.17  capital=$855.84  liq_range=[$121.07, $233.27]
+  2025-11-16  CLOSE  @ $137.10  capital=$856.80  reason: MARGIN_LONG (9.9% from liq)
+  2025-11-17  OPEN   @ $130.93  capital=$851.98  liq_range=[$89.47, $172.39]
+  2026-01-31  CLOSE  @ $105.44  capital=$861.95  reason: MARGIN_LONG (5.5% from liq)
+  2026-02-01  OPEN   @ $100.67  capital=$857.10  liq_range=[$68.79, $132.55]
+  2026-02-06  CLOSE  @ $87.38  capital=$852.32  reason: LIQUIDATION_LONG (low=$67.52 <= liq=$68.79)
+  2026-02-06  LIQ_PENALTY  $-42.62
+  2026-02-07  OPEN   @ $87.52  capital=$805.03  liq_range=[$59.80, $115.23]
+
+### 4. Managed Performance Matrix (10% liquidation buffer)
+
+                                $1k                     $10k                    $100k
+                Ann     Fees    Rot      Ann     Fees    Rot      Ann     Fees    Rot
+----------------------------------------------------------------------------------
+  2x        +3.8% $    25     6    +4.8% $   147     6    +4.9% $  1367     6 
+  3x       -17.6% $    89    18   -14.9% $   574    18   -14.7% $  5426    18 
+  4x       -19.5% $   212    36   -14.1% $  1521    36   -13.6% $ 14607    36 
+
+### 5. Naive vs Managed — Annualized Return
+
+       Cap  Lev      Naive    Managed      Delta  Rotations   Liq Events
+--------------------------------------------------------------------
+$   1,000   2x    -13.1%     +3.8%    +16.9pp        6          0
+$   1,000   3x    -27.7%    -17.6%    +10.0pp       18          4
+$   1,000   4x    -50.9%    -19.5%    +31.4pp       36          2
+$  10,000   2x    -12.4%     +4.8%    +17.2pp        6          0
+$  10,000   3x    -26.4%    -14.9%    +11.5pp       18          4
+$  10,000   4x    -49.0%    -14.1%    +34.8pp       36          2
+$ 100,000   2x    -12.3%     +4.9%    +17.2pp        6          0
+$ 100,000   3x    -26.3%    -14.7%    +11.6pp       18          4
+$ 100,000   4x    -48.8%    -13.6%    +35.2pp       36          2
+
+### 6. Liquidation Buffer Sensitivity — $10k, 3x
+
+  Buffer   Ann Return    Rotations   Total Fees   Fees/Gross     Max DD
+--------------------------------------------------------------------
+     0%        -26.4%          9 $       269       35.0%     29.9%
+     5%        -13.0%         11 $       354       44.2%     14.9%
+    10%        -14.9%         18 $       574       73.5%     17.1%
+    15%        -14.6%         31 $      1017      128.5%     16.4%
+    20%        -11.8%         48 $      1594      214.2%     13.3%
+    25%        -23.5%         92 $      2834      456.8%     26.4%
+    30%        -43.8%        200 $      5230     1690.4%     49.2%
+
+### 7. Fee Impact with Rotations — $10k, 3x, managed (10% buffer)
+
+  Asgard Fee   Ann Return   Total Fees   Delta vs 0.15%
+------------------------------------------------------
+    0.15%         -14.9% $       574          +0.00pp
+    0.10%         -13.9% $       454          +1.01pp
+    0.05%         -12.9% $       333          +2.04pp
+    0.00%         -11.9% $       210          +3.08pp
+
+=====================================================================================
+DONE
+=====================================================================================

@@ -1,0 +1,185 @@
+Loading data...
+Aligned: 410 days (2024-12-31 to 2026-02-13)
+SOL: $189.44 → $79.87 (-57.8%)
+
+====================================================================================================
+DRIFT vs HYPERLIQUID: DELTA-NEUTRAL BACKTEST COMPARISON
+Period: 2024-12-31 to 2026-02-13 (410 days)
+SOL: $189.44 → $79.87 (-57.8%)
+====================================================================================================
+
+### 0. Venue Parameter Comparison
+
+Parameter                          Hyperliquid           Drift               Impact
+----------------------------------------------------------------------------------
+Taker fee (bps)                            3.5             3.5            Identical
+Maintenance margin                        5.0%            3.0%  Drift survives more
+Liquidation penalty              50% of equity 2.5% of notional     Drift much lower
+Bridge/transfer cost                     $3.00          $0.001  Drift 3000x cheaper
+Avg daily funding                       +4.16%          -5.41%  HL pays shorts more
+Positive funding days                     298/410            140/410    HL more favorable
+
+### 1. Side-by-Side Performance Matrix
+
+                 │       --- Hyperliquid ---        │          --- Drift ---          
+       Cap  Lev  │  Ann Ret     Fees  Liqs   MaxDD │  Ann Ret     Fees  Liqs   MaxDD  │   Δ Ret
+---------------------------------------------------------------------------------------------------------
+$   1,000   2x  │    -8.5% $    32    1  15.1% │    -5.2% $     8    1   6.7%  │   +3.4% D
+$   1,000   3x  │    -5.3% $    31    1   9.5% │    -9.2% $    10    1  10.7%  │   -3.8% H
+$   1,000   4x  │   -22.1% $    71    5  32.8% │    +1.4% $    39    5   6.6%  │  +23.5% D
+$  10,000   2x  │    -4.8% $    63    1  12.9% │    -4.8% $    45    1   6.5%  │   -0.0% H
+$  10,000   3x  │    -3.5% $    87    1   8.4% │    -8.9% $    65    1  10.6%  │   -5.4% H
+$  10,000   4x  │   -19.6% $   283    5  31.5% │    +2.3% $   287    5   6.4%  │  +21.8% D
+$ 100,000   2x  │    -4.7% $   432    1  12.9% │    -4.8% $   418    1   6.5%  │   -0.1% H
+$ 100,000   3x  │    -3.3% $   647    1   8.3% │    -8.8% $   617    1  10.5%  │   -5.5% H
+$ 100,000   4x  │   -19.3% $ 2,406    5  31.4% │    +2.3% $ 2,764    5   6.4%  │  +21.7% D
+
+### 2. Optimal Rebalance Trigger — $10k
+
+  2x leverage:
+     Trigger │   HL Ret  HL Liqs │   DR Ret  DR Liqs │       Δ
+  -----------------------------------------------------------------
+          3x │    +3.3%      0 │    -4.8%      0 │   -8.1%
+          4x │    -4.8%      1 │    -4.8%      1 │   -0.0%
+          5x │    +4.0%      0 │    -6.5%      2 │  -10.5%
+          6x │    -9.6%      2 │    -6.7%      2 │   +2.9%
+          8x │    -9.6%      2 │    -6.8%      2 │   +2.8%
+         10x │    -8.1%      2 │    -7.0%      2 │   +1.1%
+       never │   -10.5%      4 │   -11.8%      4 │   -1.3%
+  → HL best: 5x (+4.0%)  Drift best: 3x (-4.8%)
+
+  3x leverage:
+     Trigger │   HL Ret  HL Liqs │   DR Ret  DR Liqs │       Δ
+  -----------------------------------------------------------------
+          4x │   -13.2%      2 │    -8.8%      1 │   +4.4%
+          5x │    -8.4%      2 │   -11.4%      2 │   -3.0%
+          6x │    -3.5%      1 │    -8.9%      1 │   -5.4%
+          8x │    -5.2%      5 │    -1.3%      5 │   +3.9%
+         10x │   -18.6%      7 │    -7.1%      5 │  +11.5%
+       never │   -33.6%     10 │   -22.0%     10 │  +11.7%
+  → HL best: 6x (-3.5%)  Drift best: 8x (-1.3%)
+
+  4x leverage:
+     Trigger │   HL Ret  HL Liqs │   DR Ret  DR Liqs │       Δ
+  -----------------------------------------------------------------
+          6x │   -25.4%      7 │   -16.7%      3 │   +8.7%
+          8x │   -19.6%      5 │    +2.3%      5 │  +21.8%
+         10x │   -37.5%     12 │    -5.7%      4 │  +31.8%
+       never │   -42.4%     19 │   -15.1%     18 │  +27.4%
+  → HL best: 8x (-19.6%)  Drift best: 8x (+2.3%)
+
+### 3. Fee & Cost Comparison — $10k
+
+ Lev │         --- Hyperliquid ---         │            --- Drift ---           
+     │  Trd Fees   Bridge   Liq Pen     Total │  Trd Fees   Bridge   Liq Pen     Total
+-------------------------------------------------------------------------------------
+ 2x  │ $     45 $    18 $  1,196 $  1,259 │ $     45 $  0.01 $    258 $    304
+ 3x  │ $     66 $    21 $    830 $    917 │ $     65 $  0.02 $    388 $    453
+ 4x  │ $    247 $    36 $  3,244 $  3,527 │ $    287 $  0.03 $      0 $    287
+
+### 4. P&L Waterfall Comparison — $10k
+
+      │                --- Hyperliquid ---                 │                   --- Drift ---                   
+ Lev  │    Carry   Funding    Gross    Fees   LiqPen      MTM     Return │    Carry   Funding    Gross    Fees   LiqPen      MTM     Return
+-----------------------------------------------------------------------------------------------------------------------------
+ 2x  │ $   214 $    534 $   747 $   63 $ 1,196 $   -28 $    -540 │ $   212 $   -423 $  -211 $   45 $   258 $   -29 $    -544
+ 3x  │ $   205 $    566 $   771 $   87 $   830 $  -244 $    -390 │ $   123 $   -622 $  -500 $   65 $   388 $   -42 $    -994
+ 4x  │ $   125 $    758 $   883 $  283 $ 3,244 $   445 $  -2,199 │ $    68 $ -1,031 $  -963 $  287 $     0 $ 1,503 $    +253
+
+### 5. Funding Rate Comparison
+
+Metric                             Hyperliquid           Drift
+--------------------------------------------------------------
+Mean daily rate                    +0.00011401     -0.00014812
+Std dev daily rate                  0.00045303      0.00049435
+Annualized mean                         +4.16%          -5.41%
+Positive days (shorts earn)               298            140
+Negative days (shorts pay)                112            270
+Max daily rate                     +0.00165645     +0.00094063
+Min daily rate                     -0.00399748     -0.00669656
+Cross-venue correlation                  0.626
+
+  Monthly funding (annualized %):
+  Month              HL      Drift          Δ
+  ------------------------------------------
+  2024-12         +1.8%      -3.7%      -5.5%
+  2025-01        +11.1%      +5.9%      -5.2%
+  2025-02         +1.3%     -17.5%     -18.8%
+  2025-03         -1.8%     -13.2%     -11.5%
+  2025-04         -5.9%     -11.7%      -5.7%
+  2025-05        +10.6%      -1.1%     -11.7%
+  2025-06         +6.9%      -1.9%      -8.8%
+  2025-07        +19.9%      +6.8%     -13.0%
+  2025-08        +11.8%      -2.1%     -13.9%
+  2025-09        +10.8%      +3.1%      -7.8%
+  2025-10         -4.8%     -16.8%     -12.1%
+  2025-11         -2.4%     -10.6%      -8.2%
+  2025-12         +5.5%      +0.9%      -4.6%
+  2026-01         +3.1%      -3.9%      -7.0%
+  2026-02        -25.4%     -27.7%      -2.3%
+
+### 6. Delta-Neutral Verification — $10k, 3x
+
+  Hyperliquid:
+    Start: $9,969  End: $9,611
+    Min: $9,201  Max: $10,041  Std: $266
+    SOL moved: -57.8%  Equity moved: -3.6%  → delta-neutral
+
+  Drift:
+    Start: $9,967  End: $9,008
+    Min: $9,007  Max: $10,070  Std: $319
+    SOL moved: -57.8%  Equity moved: -9.6%  → delta-neutral
+
+### 7. Event Log — $10k, 3x
+
+  Hyperliquid:
+    2024-12-31  OPEN   @ $189.44  long=$4985 short=$4985  notional=$15000
+    2025-01-03  REBAL  @ $218.02  xfer=$2249  lev=6.3x  → long=$4992 short=$4992
+    2025-01-09  REBAL  @ $184.91  xfer=$2641  lev=6.2x  → long=$5001 short=$5001
+    2025-01-17  REBAL  @ $219.51  xfer=$2728  lev=7.6x  → long=$5020 short=$5020
+    2025-01-18  **LIQ** @ $262.20  leg=SHORT  penalty=$830  long=$8410 short=$830
+    2025-01-18  REOPEN @ $262.20  long=$4603 short=$4603  notional=$13808
+    2025-02-02  REBAL  @ $203.45  xfer=$3116  lev=7.1x  → long=$4621 short=$4621
+    2025-02-26  REBAL  @ $135.32  xfer=$3594  lev=7.0x  → long=$4617 short=$4617
+    2025-07-21  REBAL  @ $195.76  xfer=$3166  lev=6.4x  → long=$4779 short=$4779
+    2025-11-21  REBAL  @ $128.60  xfer=$3694  lev=6.1x  → long=$4853 short=$4853
+
+  Drift:
+    2024-12-31  OPEN   @ $189.44  long=$4985 short=$4985  notional=$15000
+    2025-01-03  REBAL  @ $218.02  xfer=$2261  lev=6.3x  → long=$4981 short=$4981
+    2025-01-09  REBAL  @ $184.91  xfer=$2634  lev=6.2x  → long=$4985 short=$4985
+    2025-01-17  REBAL  @ $219.51  xfer=$2766  lev=7.9x  → long=$4968 short=$4968
+    2025-01-18  REBAL  @ $262.20  xfer=$3386  lev=13.1x  → long=$4972 short=$4972
+    2025-01-27  REBAL  @ $234.95  xfer=$2212  lev=6.7x  → long=$5019 short=$5019
+    2025-02-02  REBAL  @ $203.45  xfer=$2523  lev=6.5x  → long=$5033 short=$5033
+    2025-02-23  REBAL  @ $167.80  xfer=$2754  lev=6.1x  → long=$4948 short=$4948
+    2025-03-09  REBAL  @ $126.40  xfer=$3257  lev=6.2x  → long=$4882 short=$4882
+    2025-05-08  REBAL  @ $164.62  xfer=$3150  lev=7.8x  → long=$4827 short=$4827
+    2025-07-21  REBAL  @ $195.76  xfer=$2497  lev=6.5x  → long=$4885 short=$4885
+    2025-08-01  REBAL  @ $162.60  xfer=$2677  lev=6.1x  → long=$4860 short=$4860
+    2025-08-13  REBAL  @ $201.70  xfer=$3154  lev=9.1x  → long=$4918 short=$4918
+    2025-09-11  REBAL  @ $228.78  xfer=$2198  lev=6.5x  → long=$4971 short=$4971
+    2025-09-25  REBAL  @ $192.60  xfer=$2933  lev=8.0x  → long=$4930 short=$4930
+    2025-10-01  REBAL  @ $221.96  xfer=$2378  lev=6.8x  → long=$4981 short=$4981
+    2025-10-10  **LIQ** @ $187.53  leg=LONG  penalty=$388  long=$1751 short=$7689
+    2025-10-10  REOPEN @ $187.53  long=$4703 short=$4703  notional=$14109
+    2025-11-13  REBAL  @ $144.66  xfer=$3102  lev=7.4x  → long=$4582 short=$4582
+    2026-02-01  REBAL  @ $100.67  xfer=$3279  lev=6.1x  → long=$4538 short=$4538
+
+### 8. Winner Summary
+
+       Cap  Lev │       HL    Drift │ Winner  Why
+----------------------------------------------------------------------
+$   1,000   2x │    -8.5%    -5.2% │ Drift   lower liq penalty
+$   1,000   3x │    -5.3%    -9.2% │ HL      better funding
+$   1,000   4x │   -22.1%    +1.4% │ Drift   lower liq penalty
+$  10,000   2x │    -4.8%    -4.8% │ HL      better funding
+$  10,000   3x │    -3.5%    -8.9% │ HL      better funding
+$  10,000   4x │   -19.6%    +2.3% │ Drift   lower liq penalty
+$ 100,000   2x │    -4.7%    -4.8% │ HL      better funding
+$ 100,000   3x │    -3.3%    -8.8% │ HL      better funding
+$ 100,000   4x │   -19.3%    +2.3% │ Drift   lower liq penalty
+
+====================================================================================================
+DONE
+====================================================================================================
