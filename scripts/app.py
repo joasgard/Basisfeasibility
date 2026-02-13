@@ -36,12 +36,9 @@ st.set_page_config(
 st.title("Delta-Neutral Basis Trading — Feasibility Dashboard")
 
 st.markdown(
-    "**Long leg (Asgard):** Deposit SOL as collateral on Kamino via Asgard, borrow USDC. "
-    "Earns SOL lending yield, pays USDC borrow interest. "
-    "**Short leg:** Short SOL perp on **Hyperliquid** (order book, higher funding, $3 bridge) "
-    "or **Drift** (vAMM on Solana, lower funding, near-zero bridge). "
-    "Price exposure cancels out — profit comes from carry + funding minus fees. "
-    "Position only opens when net APY > threshold, closes when APY drops or nears liquidation."
+    "**Long leg (Asgard):** SOL collateral on Kamino, borrow USDC. Earns lending yield, pays borrow interest.\n\n"
+    "**Short leg:** SOL perp on **Hyperliquid** or **Drift**. Earns funding rate.\n\n"
+    "Price exposure cancels out — profit = carry + funding - fees. Opens when net APY > threshold."
 )
 
 # ── Data loading (cached) ────────────────────────────────────────────
