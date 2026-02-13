@@ -379,13 +379,63 @@ with main_tab2:
         "This section answers that question at different APY levels and leverage."
     )
 
+    levs_be = [2.0, 2.5, 3.0, 3.5, 4.0]
+    venue_cfgs = {"Hyperliquid": venue_hl(data), "Drift": venue_drift(data)}
+    apy_levels = [10, 15, 20, 25, 30, 40, 50]
+
+    # -- Top-level charts: breakeven days bar + curve side by side --
+    be_col1, be_col2 = st.columns(2)
+
+    with be_col1:
+        fig_be_days = go.Figure()
+        vcfg_ref = list(venue_cfgs.values())[0]
+        for lev in [2.0, 3.0, 4.0]:
+            cost = cycle_cost(capital, lev, vcfg_ref)
+            days_list = []
+            for apy in apy_levels:
+                daily_income = capital * (apy / 100) / 365
+                days_list.append(cost / daily_income if daily_income > 0 else None)
+            fig_be_days.add_trace(go.Bar(
+                x=[f"{a}%" for a in apy_levels], y=days_list,
+                name=f"{lev:.0f}x Leverage", marker_color=LEV_COLORS[lev],
+            ))
+        fig_be_days.update_layout(
+            title=f"Breakeven Days by APY Level — ${capital:,}",
+            xaxis_title="Net APY", yaxis_title="Days to Break Even",
+            barmode="group", height=400,
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        )
+        st.plotly_chart(fig_be_days, use_container_width=True)
+
+    with be_col2:
+        fig_be_curve = go.Figure()
+        apy_range = list(range(5, 61))
+        for lev in [2.0, 3.0, 4.0]:
+            cost = cycle_cost(capital, lev, venue_cfgs["Hyperliquid"])
+            days = [cost / (capital * (a / 100) / 365) for a in apy_range]
+            fig_be_curve.add_trace(go.Scatter(
+                x=apy_range, y=days,
+                name=f"{lev:.0f}x Leverage",
+                line=dict(color=LEV_COLORS[lev]),
+            ))
+        fig_be_curve.add_hline(y=7, line_dash="dot", line_color="gray", annotation_text="7 days")
+        fig_be_curve.add_hline(y=14, line_dash="dot", line_color="gray", annotation_text="14 days")
+        fig_be_curve.update_layout(
+            title=f"Days Needed to Break Even — ${capital:,}",
+            xaxis_title="Net APY %",
+            yaxis_title="Days to Break Even",
+            height=400,
+            yaxis=dict(range=[0, 30]),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        )
+        st.plotly_chart(fig_be_curve, use_container_width=True)
+
+    st.divider()
+
     # -----------------------------------------------------------------
     # 1. Fee breakdown per cycle
     # -----------------------------------------------------------------
     st.subheader("Cost Per Open/Close Cycle")
-
-    levs_be = [2.0, 2.5, 3.0, 3.5, 4.0]
-    venue_cfgs = {"Hyperliquid": venue_hl(data), "Drift": venue_drift(data)}
 
     fee_rows = []
     for lev in levs_be:
@@ -441,8 +491,6 @@ with main_tab2:
         "the open + close fees for one cycle."
     )
 
-    apy_levels = [10, 15, 20, 25, 30, 40, 50]
-
     for vname, vcfg in venue_cfgs.items():
         be_rows = []
         for lev in levs_be:
@@ -459,60 +507,6 @@ with main_tab2:
 
         st.markdown(f"**{vname}** — ${capital:,}")
         st.dataframe(pd.DataFrame(be_rows), hide_index=True, use_container_width=True)
-
-    # Grouped bar chart: breakeven days by APY level
-    fig_be_days = go.Figure()
-    vcfg_ref = list(venue_cfgs.values())[0]
-    for lev in [2.0, 3.0, 4.0]:
-        cost = cycle_cost(capital, lev, vcfg_ref)
-        days_list = []
-        for apy in apy_levels:
-            daily_income = capital * (apy / 100) / 365
-            days_list.append(cost / daily_income if daily_income > 0 else None)
-        fig_be_days.add_trace(go.Bar(
-            x=[f"{a}%" for a in apy_levels], y=days_list,
-            name=f"{lev:.0f}x Leverage", marker_color=LEV_COLORS[lev],
-        ))
-    fig_be_days.update_layout(
-        title=f"Breakeven Days by APY Level — ${capital:,}",
-        xaxis_title="Net APY", yaxis_title="Days to Break Even",
-        barmode="group", height=400,
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
-    )
-    st.plotly_chart(fig_be_days, use_container_width=True)
-
-    st.divider()
-
-    # -----------------------------------------------------------------
-    # 3. Breakeven curve chart
-    # -----------------------------------------------------------------
-    st.subheader("Breakeven Days vs Net APY")
-
-    fig_be_curve = go.Figure()
-    apy_range = list(range(5, 61))
-
-    for lev in [2.0, 3.0, 4.0]:
-        # Use HL cost (HL and Drift have nearly identical fee_bps)
-        cost = cycle_cost(capital, lev, venue_cfgs["Hyperliquid"])
-        days = [cost / (capital * (a / 100) / 365) for a in apy_range]
-        fig_be_curve.add_trace(go.Scatter(
-            x=apy_range, y=days,
-            name=f"{lev:.0f}x Leverage",
-            line=dict(color=LEV_COLORS[lev]),
-        ))
-
-    fig_be_curve.add_hline(y=7, line_dash="dot", line_color="gray", annotation_text="7 days")
-    fig_be_curve.add_hline(y=14, line_dash="dot", line_color="gray", annotation_text="14 days")
-
-    fig_be_curve.update_layout(
-        title=f"Days Needed to Break Even — ${capital:,}",
-        xaxis_title="Net APY %",
-        yaxis_title="Days to Break Even",
-        height=400,
-        yaxis=dict(range=[0, 30]),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02),
-    )
-    st.plotly_chart(fig_be_curve, use_container_width=True)
 
     st.divider()
 
