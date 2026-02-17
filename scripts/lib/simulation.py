@@ -10,7 +10,7 @@ Strategy rules:
   - Capital sits idle when conditions aren't met
 """
 
-ASGARD_FEE_BPS = 15   # 0.15% on notional (open only)
+ASGARD_FEE_BPS = 15   # 0.15% on long leg notional (open only)
 GAS_COST = 2.0        # per on-chain operation
 
 

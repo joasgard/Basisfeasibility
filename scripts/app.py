@@ -19,7 +19,7 @@ import pandas as pd
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
-from lib.data import load_data
+from lib.data import load_data, apply_lending_protocol
 from lib.simulation import (
     run_simulation, venue_hl, venue_drift,
     compute_net_apy, ASGARD_FEE_BPS, GAS_COST,
@@ -35,28 +35,11 @@ st.set_page_config(
 
 st.title("Delta-Neutral Basis Trading — Feasibility Dashboard")
 
-st.markdown(
-    "**Long leg (Asgard):** SOL collateral on Kamino, borrow USDC. Earns lending yield, pays borrow interest.\n\n"
-    "**Short leg:** SOL perp on **Hyperliquid** or **Drift**. Earns funding rate.\n\n"
-    "Price exposure cancels out — profit = carry + funding - fees. Opens when net APY > threshold."
-)
-
 # ── Data loading (cached) ────────────────────────────────────────────
 
 @st.cache_data
 def get_data():
     return load_data()
-
-data = get_data()
-all_dates = data["all_dates"]
-N = len(all_dates)
-p_start = data["price_by_date"][all_dates[0]]["close"]
-p_end = data["price_by_date"][all_dates[-1]]["close"]
-
-st.caption(
-    f"Period: {all_dates[0]} to {all_dates[-1]} ({N} days) · "
-    f"SOL: ${p_start:.2f} → ${p_end:.2f} ({(p_end/p_start-1)*100:+.1f}%)"
-)
 
 # ── Sidebar ──────────────────────────────────────────────────────────
 
@@ -70,7 +53,7 @@ capital = st.sidebar.selectbox(
 )
 
 leverage = st.sidebar.slider(
-    "Leverage", min_value=2.0, max_value=4.0, value=3.0, step=0.5,
+    "Leverage", min_value=2.0, max_value=4.0, value=2.0, step=0.5,
 )
 
 apy_threshold = st.sidebar.slider(
@@ -98,7 +81,30 @@ asgard_fee_bps = st.sidebar.number_input(
     help="Asgard opening fee in basis points (0.15% = 15 bps). Charged on notional at open only.",
 )
 
-venue_choice = st.sidebar.radio("Venue", ["Hyperliquid", "Drift", "Both"], index=2)
+lending_protocol = st.sidebar.radio("Lending Protocol", ["Kamino", "Drift", "Marginfi"])
+
+venue_choice = st.sidebar.radio("Venue", ["Hyperliquid", "Drift", "Both"], index=0)
+
+# ── Apply lending protocol & header ─────────────────────────────────
+
+raw_data = get_data()
+data = apply_lending_protocol(raw_data, lending_protocol)
+all_dates = data["all_dates"]
+N = len(all_dates)
+p_start = data["price_by_date"][all_dates[0]]["close"]
+p_end = data["price_by_date"][all_dates[-1]]["close"]
+
+st.markdown(
+    f"**Long leg (Asgard):** SOL collateral on **{lending_protocol}**, borrow USDC. Earns lending yield, pays borrow interest.\n\n"
+    "**Short leg:** SOL perp on **Hyperliquid** or **Drift**. Earns funding rate.\n\n"
+    "Price exposure cancels out — profit = carry + funding - fees. Opens when net APY > threshold."
+)
+
+st.caption(
+    f"Lending: {lending_protocol} · "
+    f"Period: {all_dates[0]} to {all_dates[-1]} ({N} days) · "
+    f"SOL: ${p_start:.2f} → ${p_end:.2f} ({(p_end/p_start-1)*100:+.1f}%)"
+)
 
 # ── Helpers ──────────────────────────────────────────────────────────
 
@@ -113,22 +119,23 @@ def get_venues():
 VENUE_COLORS = {"Hyperliquid": "#636EFA", "Drift": "#EF553B"}
 
 @st.cache_data
-def cached_sim(_data_id, cap, lev, venue_name, apy_thr, liq_buf, lb_days, fee_bps):
-    venues = {"Hyperliquid": venue_hl(data), "Drift": venue_drift(data)}
+def cached_sim(_data_id, cap, lev, venue_name, apy_thr, liq_buf, lb_days, fee_bps, protocol):
+    proto_data = apply_lending_protocol(get_data(), protocol)
+    venues = {"Hyperliquid": venue_hl(proto_data), "Drift": venue_drift(proto_data)}
     return run_simulation(
-        data, cap, lev, venues[venue_name],
+        proto_data, cap, lev, venues[venue_name],
         apy_threshold=apy_thr, liq_buffer_pct=liq_buf,
         lookback_days=lb_days, asgard_fee_bps=fee_bps,
     )
 
-data_id = (all_dates[0], all_dates[-1], N)
+data_id = (all_dates[0], all_dates[-1], N, lending_protocol)
 
 def sim(cap, lev, vname, apy_thr, liq_buf, lb_days=None, fee_bps=None):
     if lb_days is None:
         lb_days = lookback
     if fee_bps is None:
         fee_bps = asgard_fee_bps
-    return cached_sim(data_id, cap, lev, vname, apy_thr, liq_buf, lb_days, fee_bps)
+    return cached_sim(data_id, cap, lev, vname, apy_thr, liq_buf, lb_days, fee_bps, lending_protocol)
 
 def find_contiguous_blocks(dates_list, all_dates_ref):
     if not dates_list:
@@ -172,7 +179,7 @@ for vname, vcfg in venues:
 # MAIN TABS
 # ═════════════════════════════════════════════════════════════════════
 
-main_tab2, main_tab1 = st.tabs(["Breakeven Analysis", "Comparison Analysis"])
+main_tab1, main_tab2 = st.tabs(["Backtest", "Breakeven"])
 
 # ═════════════════════════════════════════════════════════════════════
 # TAB 1: COMPARISON ANALYSIS (HL vs Drift)
