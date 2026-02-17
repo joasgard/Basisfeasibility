@@ -229,6 +229,42 @@ with main_tab1:
 
     st.divider()
 
+    # -- Event Timeline --
+    st.subheader("Event Timeline")
+    for vname, _ in venues:
+        r = results[vname]
+        fig_tl = go.Figure()
+        sol_prices = [data["price_by_date"][d]["close"] for d in all_dates]
+        fig_tl.add_trace(go.Scatter(x=all_dates, y=sol_prices, name="SOL Price", line=dict(color="gray"), opacity=0.7))
+        eq_df = pd.DataFrame(r["daily_equity"])
+        deployed_dates = eq_df[eq_df["state"] == "DEPLOYED"]["date"].tolist()
+        for b_start, b_end in find_contiguous_blocks(deployed_dates, all_dates):
+            fig_tl.add_vrect(x0=b_start, x1=b_end, fillcolor="green", opacity=0.07, layer="below", line_width=0)
+        open_evts = [e for e in r["events"] if e["type"] == "OPEN"]
+        if open_evts:
+            fig_tl.add_trace(go.Scatter(x=[e["date"] for e in open_evts], y=[e["price"] for e in open_evts], mode="markers", marker=dict(size=12, color="#2ECC71", symbol="triangle-up"), name="Open", hovertext=[f"OPEN<br>Price: ${e['price']:.2f}<br>Net APY: {e['net_apy']:.1f}%<br>Notional: ${e['notional']:,.0f}" for e in open_evts], hoverinfo="text"))
+        close_apy = [e for e in r["events"] if e["type"] == "CLOSE" and e["reason"] != "liq_proximity"]
+        close_liq = [e for e in r["events"] if e["type"] == "CLOSE" and e["reason"] == "liq_proximity"]
+        if close_apy:
+            fig_tl.add_trace(go.Scatter(x=[e["date"] for e in close_apy], y=[e["price"] for e in close_apy], mode="markers", marker=dict(size=12, color="orange", symbol="triangle-down"), name="Close (APY)", hovertext=[f"CLOSE ({e['reason']})<br>Price: ${e['price']:.2f}<br>Net APY: {e['net_apy']:.1f}%<br>Equity: ${e['equity_after']:,.0f}<br>Long buf: {e['long_buffer']:.1f}%  Short buf: {e['short_buffer']:.1f}%" for e in close_apy], hoverinfo="text"))
+        if close_liq:
+            fig_tl.add_trace(go.Scatter(x=[e["date"] for e in close_liq], y=[e["price"] for e in close_liq], mode="markers", marker=dict(size=12, color="red", symbol="x"), name="Close (Liq Proximity)", hovertext=[f"CLOSE ({e['reason']})<br>Price: ${e['price']:.2f}<br>Net APY: {e['net_apy']:.1f}%<br>Equity: ${e['equity_after']:,.0f}<br>Long buf: {e['long_buffer']:.1f}%  Short buf: {e['short_buffer']:.1f}%" for e in close_liq], hoverinfo="text"))
+        fig_tl.update_layout(title=f"{vname} — Events on SOL Price (green shading = deployed)", yaxis_title="SOL Price ($)", height=500, legend=dict(orientation="h", yanchor="bottom", y=1.02))
+        st.plotly_chart(fig_tl, use_container_width=True)
+
+        event_rows = []
+        for e in r["events"]:
+            row = {"Date": e["date"], "Type": e["type"], "Price": f"${e['price']:.2f}"}
+            if e["type"] == "OPEN":
+                row["Detail"] = f"APY={e['net_apy']:.1f}%, Notional=${e['notional']:,.0f}, Fees=${e['fees']:.0f}"
+            elif e["type"] == "CLOSE":
+                row["Detail"] = f"Reason={e['reason']}, APY={e['net_apy']:.1f}%, Equity=${e['equity_after']:,.0f}, Fees=${e['fees']:.0f}"
+            event_rows.append(row)
+        if event_rows:
+            st.dataframe(pd.DataFrame(event_rows), hide_index=True, use_container_width=True)
+
+    st.divider()
+
     # -- Net APY Over Time --
     st.subheader("Net APY Over Time")
 
@@ -340,39 +376,6 @@ with main_tab1:
         fig_hm.update_layout(title=f"{vname} — ${capital:,} (cells show return + deployed %)", xaxis_title="APY Threshold", yaxis_title="Leverage", height=450)
         with hm_cols[vi]:
             st.plotly_chart(fig_hm, use_container_width=True)
-
-    st.divider()
-
-    # -- Event Timeline --
-    st.subheader("Event Timeline")
-    for vname, vcfg in venues:
-        r = results[vname]
-        fig_tl = go.Figure()
-        sol_prices = [data["price_by_date"][d]["close"] for d in all_dates]
-        fig_tl.add_trace(go.Scatter(x=all_dates, y=sol_prices, name="SOL Price", line=dict(color="gray"), opacity=0.7))
-        eq_df = pd.DataFrame(r["daily_equity"])
-        deployed_dates = eq_df[eq_df["state"] == "DEPLOYED"]["date"].tolist()
-        for b_start, b_end in find_contiguous_blocks(deployed_dates, all_dates):
-            fig_tl.add_vrect(x0=b_start, x1=b_end, fillcolor="green", opacity=0.07, layer="below", line_width=0)
-        open_evts = [e for e in r["events"] if e["type"] == "OPEN"]
-        if open_evts:
-            fig_tl.add_trace(go.Scatter(x=[e["date"] for e in open_evts], y=[e["price"] for e in open_evts], mode="markers", marker=dict(size=12, color="#2ECC71", symbol="triangle-up"), name="Open", hovertext=[f"OPEN<br>Price: ${e['price']:.2f}<br>Net APY: {e['net_apy']:.1f}%<br>Notional: ${e['notional']:,.0f}" for e in open_evts], hoverinfo="text"))
-        close_evts = [e for e in r["events"] if e["type"] == "CLOSE"]
-        if close_evts:
-            fig_tl.add_trace(go.Scatter(x=[e["date"] for e in close_evts], y=[e["price"] for e in close_evts], mode="markers", marker=dict(size=12, color=["red" if e["reason"] == "liq_proximity" else "orange" for e in close_evts], symbol=["x" if e["reason"] == "liq_proximity" else "triangle-down" for e in close_evts]), name="Close", hovertext=[f"CLOSE ({e['reason']})<br>Price: ${e['price']:.2f}<br>Net APY: {e['net_apy']:.1f}%<br>Equity: ${e['equity_after']:,.0f}<br>Long buf: {e['long_buffer']:.1f}%  Short buf: {e['short_buffer']:.1f}%" for e in close_evts], hoverinfo="text"))
-        fig_tl.update_layout(title=f"{vname} — Events on SOL Price (green = deployed)", yaxis_title="SOL Price ($)", height=500, legend=dict(orientation="h", yanchor="bottom", y=1.02))
-        st.plotly_chart(fig_tl, use_container_width=True)
-
-        event_rows = []
-        for e in r["events"]:
-            row = {"Date": e["date"], "Type": e["type"], "Price": f"${e['price']:.2f}"}
-            if e["type"] == "OPEN":
-                row["Detail"] = f"APY={e['net_apy']:.1f}%, Notional=${e['notional']:,.0f}, Fees=${e['fees']:.0f}"
-            elif e["type"] == "CLOSE":
-                row["Detail"] = f"Reason={e['reason']}, APY={e['net_apy']:.1f}%, Equity=${e['equity_after']:,.0f}, Fees=${e['fees']:.0f}"
-            event_rows.append(row)
-        if event_rows:
-            st.dataframe(pd.DataFrame(event_rows), hide_index=True, use_container_width=True)
 
 
 # ═════════════════════════════════════════════════════════════════════
